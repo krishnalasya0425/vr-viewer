@@ -32,9 +32,6 @@ const upload = multer({ storage, fileFilter });
 // Upload asset
 router.post('/upload', upload.single('file'), async (req, res) => {
   try {
-    console.log('REQ HEADERS:', req.headers);         // ✅ debug
-    console.log('REQ FILE:', req.file);               // ✅ debug
-
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
@@ -50,11 +47,9 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     await newAsset.save();
     res.status(201).json(newAsset);
   } catch (error) {
-    console.error('UPLOAD ERROR:', error);            // ✅ debug
     res.status(500).json({ error: error.message });
   }
 });
-
 
 // Get all assets
 // In your backend/routes/assets.js
