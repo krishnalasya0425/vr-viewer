@@ -55,10 +55,7 @@ const assetRoutes = require('./routes/assets'); // adjust path as needed
 const path = require('path');
 const app = express();
 // In server.js
-app.use(cors({
-  origin: '*', // or better: ['https://192.168.1.10:5173']
-  methods: ['GET', 'POST'],
-}));
+app.use(cors());
 
 app.use(express.json());
 app.use('/api/assets', assetRoutes); // Mount here

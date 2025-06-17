@@ -31,6 +31,7 @@ const upload = multer({ storage, fileFilter });
 
 // Upload asset
 router.post('/upload', upload.single('file'), async (req, res) => {
+  console.log("hiiiiiiiiiiiiiiiiiiiiiiiii")
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });

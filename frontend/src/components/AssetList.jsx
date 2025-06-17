@@ -13,30 +13,28 @@ const AssetList = ({ assets, onSelect, onUploadSuccess }) => {
   };
 
   const handleUpload = async () => {
-    if (!file) {
-      setError('Please select a file');
-      return;
-    }
+  if (!selectedFile) return alert("No file selected");
 
-    const formData = new FormData();
-    formData.append('file', file);
+  const formData = new FormData();
+  formData.append('file', selectedFile);
 
-    try {
-      setUploading(true);
-      await axios.post('/api/assets/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      setShowUploadModal(false);
-      setFile(null);
-      onUploadSuccess();
-    } catch (err) {
-      setError(err.response?.data?.error || 'Upload failed');
-    } finally {
-      setUploading(false);
-    }
-  };
+  console.log('Uploading file:', selectedFile);
+
+  try {
+    const res = await axios.post('https://192.168.1.27:5000/api/assets/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    console.log('Upload response:', res.data);
+    alert('Upload successful');
+  } catch (error) {
+    console.error('Upload failed:', error);
+    alert('Upload failed');
+  }
+};
+
 
   return (
     <div className="asset-list-container">

@@ -34,11 +34,11 @@ const getAssetUrl = () => {
         )}
       </div>
 
-      {asset.type === 'model' && (
+      {/* {asset.type === 'model' && (
         <div className="viewer-actions">
           <button onClick={onViewVR}>View in VR</button>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

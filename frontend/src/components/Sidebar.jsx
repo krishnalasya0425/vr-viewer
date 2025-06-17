@@ -24,7 +24,7 @@ const Sidebar = ({ assets, onSelect, onUploadSuccess }) => {
 
     try {
       setUploading(true);
-      await axios.post('/api/assets/upload', formData, {
+      await axios.post('https://192.168.1.27:5000/api/assets/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
