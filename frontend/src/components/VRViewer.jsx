@@ -1,6 +1,7 @@
+import React from "react";
 const VRViewer = ({ asset, onBack }) => {
   const getAssetUrl = () => {
-    return `/uploads/${asset.path}`;
+    return `https://192.168.1.27:5000/uploads/${asset.path}`;
   };
 
   return (

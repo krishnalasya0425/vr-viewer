@@ -38,6 +38,7 @@ const Sidebar = ({ assets, onSelect, onUploadSuccess }) => {
       setUploading(false);
     }
   };
+  
 
   return (
     <div className="sidebar">

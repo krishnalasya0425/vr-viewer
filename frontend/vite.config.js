@@ -27,20 +27,24 @@ import fs from 'fs';
 
 
 // vite.config.js
+
+
+
 export default defineConfig({
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5000', // or https if using SSL
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/^\/api/, '')
-      },
-      '/uploads': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-        secure: false
-      }
-    }
+  plugins: [react()],
+ server: {
+https: {
+  key: fs.readFileSync('./ssl/key.pem'),
+  cert: fs.readFileSync('./ssl/cert.pem'),
+},
+  host: '0.0.0.0', // 👈 allows other devices to access
+  port: 5173,
+  proxy: {
+    '/api': 'https://192.168.1.27:5000',
+    '/uploads': 'https://192.168.1.27:5000'
   }
+}
+
+
 });
+

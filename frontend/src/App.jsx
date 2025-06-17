@@ -16,10 +16,7 @@ function App() {
 
   const fetchAssets = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/assets');
-    
-    // With axios, successful responses come here automatically
-    // The data is already in response.data
+    const response = await axios.get('https://192.168.1.27:5000/api/assets');
     setAssets(response.data);
     
   } catch (error) {
@@ -54,6 +51,7 @@ function App() {
         onUploadSuccess={handleUploadSuccess}
       />
       <div className="main-content">
+        
         {selectedAsset ? (
           showVR ? (
             <VRViewer asset={selectedAsset} onBack={() => setShowVR(false)} />

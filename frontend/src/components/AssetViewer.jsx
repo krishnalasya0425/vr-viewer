@@ -1,14 +1,12 @@
 import React from "react";
 
 const AssetViewer = ({ asset, onViewVR }) => {
-  const getAssetUrl = () => {
-  // Use absolute URL in production
-  const baseUrl = process.env.NODE_ENV === 'development' 
-    ? 'http://localhost:5000' 
-    : window.location.origin;
-  
-  return `${baseUrl}/uploads/${asset.path}`;
+const getAssetUrl = () => {
+  return `https://192.168.1.27:5000/uploads/${asset.path}`;
 };
+
+
+
 
   return (
     <div className="asset-viewer">
