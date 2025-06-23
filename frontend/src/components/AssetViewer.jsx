@@ -1,8 +1,10 @@
 import React from "react";
 
 const AssetViewer = ({ asset, onViewVR }) => {
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const getAssetUrl = () => {
-  return `https://192.168.1.27:5000/uploads/${asset.path}`;
+  return `${API_BASE_URL}/uploads/${asset.path}`;
 };
 
 

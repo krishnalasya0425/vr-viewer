@@ -7,6 +7,7 @@ const Sidebar = ({ assets, onSelect, onUploadSuccess }) => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -24,7 +25,7 @@ const Sidebar = ({ assets, onSelect, onUploadSuccess }) => {
 
     try {
       setUploading(true);
-      await axios.post('https://192.168.1.27:5000/api/assets/upload', formData, {
+      await axios.post(`${API_BASE_URL}/api/assets/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

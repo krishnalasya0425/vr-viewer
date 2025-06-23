@@ -9,6 +9,7 @@ function App() {
   const [assets, setAssets] = useState([]);
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [showVR, setShowVR] = useState(false);
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     fetchAssets();
@@ -16,7 +17,9 @@ function App() {
 
   const fetchAssets = async () => {
   try {
-    const response = await axios.get('https://192.168.1.27:5000/api/assets');
+    console.log("🚀 VITE_API_BASE_URL:", import.meta.env.VITE_API_BASE_URL);
+
+    const response = await axios.get(`${API_BASE_URL}/api/assets`);
     setAssets(response.data);
     
   } catch (error) {

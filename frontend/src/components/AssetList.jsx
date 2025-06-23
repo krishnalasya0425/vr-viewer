@@ -6,6 +6,8 @@ const AssetList = ({ assets, onSelect, onUploadSuccess }) => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -21,7 +23,7 @@ const AssetList = ({ assets, onSelect, onUploadSuccess }) => {
   console.log('Uploading file:', selectedFile);
 
   try {
-    const res = await axios.post('https://192.168.1.27:5000/api/assets/upload', formData, {
+    const res = await axios.post(`${API_BASE_URL}/api/assets/upload`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
