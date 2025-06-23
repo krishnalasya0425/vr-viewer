@@ -17,7 +17,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const fetchAssets = async () => {
   try {
-    console.log("🚀 VITE_API_BASE_URL:", import.meta.env.VITE_API_BASE_URL);
+
 
     const response = await axios.get(`${API_BASE_URL}/api/assets`);
     setAssets(response.data);
@@ -25,7 +25,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   } catch (error) {
     console.error('Error fetching assets:', error);
     
-    // Axios wraps the error response in error.response
+
     if (error.response) {
       console.error('Response data:', error.response.data);
       console.error('Response status:', error.response.status);

@@ -8,42 +8,50 @@ const AssetList = ({ assets, onSelect, onUploadSuccess }) => {
   const [error, setError] = useState('');
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
     setError('');
   };
 
   const handleUpload = async () => {
-  if (!selectedFile) return alert("No file selected");
+    if (!file) return alert("No file selected");
 
-  const formData = new FormData();
-  formData.append('file', selectedFile);
+    const formData = new FormData();
+    formData.append('file', file);
 
-  console.log('Uploading file:', selectedFile);
+    setUploading(true);
+    setError('');
 
-  try {
-    const res = await axios.post(`${API_BASE_URL}/api/assets/upload`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    try {
+      const res = await axios.post(`${API_BASE_URL}/api/assets/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
-    console.log('Upload response:', res.data);
-    alert('Upload successful');
-  } catch (error) {
-    console.error('Upload failed:', error);
-    alert('Upload failed');
-  }
-};
+      console.log('Upload response:', res.data);
+      alert('Upload successful');
 
+      setShowUploadModal(false);
+      setFile(null);
+      onUploadSuccess(); // refresh list
+    } catch (err) {
+      if (err.response?.data?.error?.includes('already exists')) {
+        setError('File with this name already exists. Please upload with another name.');
+      } else {
+        setError('Upload failed. Please try again.');
+      }
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
     <div className="asset-list-container">
       <div className="asset-list-header">
         <h3>VR Assets</h3>
       </div>
-      
+
       <div className="asset-items">
         {assets.map((asset) => (
           <div 
@@ -76,7 +84,7 @@ const AssetList = ({ assets, onSelect, onUploadSuccess }) => {
           <div className="modal-content">
             <h4>Upload New Asset</h4>
             <p>Supported formats: .mp4, .glb, .fbx, .obj</p>
-            
+
             <div className="file-input">
               <input 
                 type="file" 
@@ -89,12 +97,16 @@ const AssetList = ({ assets, onSelect, onUploadSuccess }) => {
               </label>
             </div>
 
-            {error && <div className="error-message">{error}</div>}
+            {error && <div className="error-message text-red-600">{error}</div>}
 
             <div className="modal-actions">
               <button 
                 className="cancel-button"
-                onClick={() => setShowUploadModal(false)}
+                onClick={() => {
+                  setShowUploadModal(false);
+                  setFile(null);
+                  setError('');
+                }}
               >
                 Cancel
               </button>

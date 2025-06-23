@@ -7,7 +7,7 @@ const Sidebar = ({ assets, onSelect, onUploadSuccess }) => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -39,7 +39,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
       setUploading(false);
     }
   };
-  
+
 
   return (
     <div className="sidebar">
@@ -48,8 +48,8 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
       </div>
       <div className="asset-list">
         {assets.map((asset) => (
-          <div 
-            key={asset._id} 
+          <div
+            key={asset._id}
             className="asset-item"
             onClick={() => onSelect(asset)}
           >
@@ -61,7 +61,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
         ))}
       </div>
       <div className="sidebar-footer">
-        <button 
+        <button
           className="upload-button"
           onClick={() => setShowUploadModal(true)}
         >
@@ -74,11 +74,36 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
           <div className="modal">
             <h3>Upload Asset</h3>
             <p>Supported formats: MP4, GLB, FBX, OBJ</p>
-            <input type="file" onChange={handleFileChange} accept=".mp4,.glb,.fbx,.obj" />
-            {error && <div className="error-message">{error}</div>}
-            <div className="modal-actions">
-              <button onClick={() => setShowUploadModal(false)}>Cancel</button>
-              <button 
+
+            <input
+              type="file"
+              id="asset-upload"
+              accept=".mp4,.glb,.fbx,.obj"
+              onChange={handleFileChange}
+              className="block w-full text-sm text-gray-700"
+            />
+
+            {file && (
+              <div style={{ color: '#000', marginTop: '10px' }}>
+                Selected File: <strong>{file.name}</strong>
+              </div>
+            )}
+
+
+
+            {error && <div className="error-message text-red-600">{error}</div>}
+
+            <div className="modal-actions mt-4">
+              <button
+                onClick={() => {
+                  setShowUploadModal(false);
+                  setFile(null);
+                  setError('');
+                }}
+              >
+                Cancel
+              </button>
+              <button
                 onClick={handleUpload}
                 disabled={uploading}
               >
@@ -88,6 +113,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
           </div>
         </div>
       )}
+
     </div>
   );
 };

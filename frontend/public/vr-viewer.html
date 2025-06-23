@@ -321,8 +321,11 @@ modelEl.setAttribute('crossorigin', 'anonymous');
     <meta charset="utf-8" />
     <title>VR Model Viewer</title>
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-orbit-controls@1.3.0/dist/aframe-orbit-controls.min.js"></script>
+    <script src="https://unpkg.com/aframe-orbit-controls@1.3.3/dist/aframe-orbit-controls.min.js"></script>
+
     <style>
-      body { margin: 0; overflow: hidden; background: #000; }
+      body { margin: 0; overflow: hidden; background: #fff; }
       #status {
         position: absolute;
         bottom: 10px;
@@ -336,14 +339,47 @@ modelEl.setAttribute('crossorigin', 'anonymous');
     </style>
   </head>
   <body>
-    <a-scene webxr="requiredFeatures: local-floor" vr-mode-ui="enabled: true">
-      <a-sky color="#ECECEC"></a-sky>
-      <a-light type="ambient" intensity="0.5"></a-light>
-      <a-light type="directional" position="1 3 -2" intensity="0.8"></a-light>
-      <a-plane rotation="-90 0 0" width="10" height="10" color="#ccc" position="0 0 0"></a-plane>
+<a-scene
+  webxr="optionalFeatures: local-floor; requiredFeatures: local-floor"
+  vr-mode-ui="enabled: true"
+  renderer="colorManagement: true; physicallyCorrectLights: true"
+>
 
-      <a-entity id="model" position="0 1.5 -3" rotation="0 0 0" scale="1 1 1" shadow="receive: true"></a-entity>
+      <a-sky color="#ffffff"></a-sky>
 
+      <!-- Lighting -->
+      <a-light type="ambient" intensity="1.5" color="#ffffff"></a-light>
+      <a-light type="directional" intensity="1" position="0 4 4" color="#ffffff"></a-light>
+
+      <!-- Orbit controls for desktop rotation + zoom -->
+      <!-- Orbit camera for desktop mouse rotation + zoom -->
+    <a-entity 
+        id="orbitCamera"
+        camera
+        position="0 1.6 5"
+        look-controls="enabled: false"
+        orbit-controls="
+          target: 0 1.5 0;
+          enableDamping: true;
+          dampingFactor: 0.15;
+          rotateSpeed: 0.25;
+          zoomSpeed: 0.5;
+          minDistance: 1;
+          maxDistance: 10;
+          enableZoom: true;
+          enableRotate: true;
+        "
+      ></a-entity>
+
+      <!-- Model container -->
+      <a-entity 
+        id="model" 
+        position="0 1.5 -3" 
+        rotation="0 180 0" 
+        scale="1 1 1">
+      </a-entity>
+
+      <!-- VR Controllers -->
       <a-entity id="leftController" tracked-controls="hand: left" visible="false"></a-entity>
       <a-entity id="rightController" tracked-controls="hand: right" visible="false"></a-entity>
     </a-scene>
@@ -358,6 +394,7 @@ modelEl.setAttribute('crossorigin', 'anonymous');
 
       const urlParams = new URLSearchParams(window.location.search);
       const modelUrl = urlParams.get('model');
+
       if (modelUrl) {
         modelEl.setAttribute('gltf-model', `url(${modelUrl})`);
         modelEl.setAttribute('crossorigin', 'anonymous');
@@ -367,15 +404,30 @@ modelEl.setAttribute('crossorigin', 'anonymous');
 
       modelEl.addEventListener('model-loaded', () => {
         const box = new THREE.Box3().setFromObject(modelEl.object3D);
-        const size = box.getSize(new THREE.Vector3()).length();
+        const size = box.getSize(new THREE.Vector3());
         const center = box.getCenter(new THREE.Vector3());
 
-        const scaleMultiplier = 10;
-        const scale = scaleMultiplier / size;
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const scale = 7 / maxDim;
+
         modelEl.setAttribute('scale', { x: scale, y: scale, z: scale });
 
         modelEl.object3D.position.sub(center);
         modelEl.object3D.position.y += 1.5;
+
+        // Preserve original materials (no shading overrides)
+        modelEl.object3D.traverse((node) => {
+          if (node.isMesh) {
+            node.castShadow = false;
+            node.receiveShadow = false;
+            if (node.material) {
+              node.material.flatShading = false;
+              node.material.needsUpdate = true;
+            }
+          }
+        });
+
+        status.innerText = 'Model loaded';
       });
 
       function getGamepad(controllerEl) {
@@ -389,57 +441,50 @@ modelEl.setAttribute('crossorigin', 'anonymous');
       let targetPos = { x: 0, y: 1.5, z: -3 };
       let targetRot = { x: 0, y: 0, z: 0 };
 
-     function pollControllers() {
-  const leftGamepad = getGamepad(leftController);
-  const rightGamepad = getGamepad(rightController);
+      function pollControllers() {
+        const leftGamepad = getGamepad(leftController);
+        const rightGamepad = getGamepad(rightController);
 
-  let dx = 0, dz = 0;
-  let rotate = false;
-  let dyaw = 0;
+        let dx = 0, dz = 0, rotate = false;
 
-  if (rightGamepad) {
-    dx += rightGamepad.axes[2] || 0;
-    dz += rightGamepad.axes[3] || 0;
+        if (rightGamepad) {
+          dx += rightGamepad.axes[2] || 0;
+          dz += rightGamepad.axes[3] || 0;
+          rotate = rightGamepad.buttons[0]?.pressed || rightGamepad.buttons[1]?.pressed;
+        }
 
-    // If trigger (button[0]) is pressed, enable rotation
-    if (rightGamepad.buttons[0]?.pressed) {
-      rotate = true;
-      dyaw = dx; // Use horizontal axis to rotate when trigger held
-      dx = 0;    // prevent panning while rotating
-    }
-  }
+        if (leftGamepad) {
+          dx += leftGamepad.axes[2] || 0;
+          dz += leftGamepad.axes[3] || 0;
+          rotate = rotate || leftGamepad.buttons[0]?.pressed || leftGamepad.buttons[1]?.pressed;
+        }
 
-  // Move (pan + zoom)
-  if (!rotate) {
-    targetPos.x += dx * 0.08;
-    targetPos.z += dz * 0.08;
-  }
+        if (dx !== 0 || dz !== 0) {
+          targetPos.x += dx * 0.08;
+          targetPos.z += dz * 0.08;
+        }
 
-  // Rotate if trigger + joystick held
-  if (rotate && dyaw !== 0) {
-    targetRot.y += dyaw * 2.5;
-  }
+        if (rotate) {
+          targetRot.y += 3;
+        }
 
-  // Smooth transitions
-  const currentPos = modelEl.getAttribute('position');
-  const currentRot = modelEl.getAttribute('rotation');
+        const currentPos = modelEl.getAttribute('position');
+        const currentRot = modelEl.getAttribute('rotation');
 
-  modelEl.setAttribute('position', {
-    x: lerp(currentPos.x, targetPos.x, 0.1),
-    y: currentPos.y,
-    z: lerp(currentPos.z, targetPos.z, 0.1)
-  });
+        modelEl.setAttribute('position', {
+          x: lerp(currentPos.x, targetPos.x, 0.1),
+          y: currentPos.y,
+          z: lerp(currentPos.z, targetPos.z, 0.1)
+        });
 
-  modelEl.setAttribute('rotation', {
-    x: currentRot.x,
-    y: lerp(currentRot.y, targetRot.y, 0.1),
-    z: currentRot.z
-  });
+        modelEl.setAttribute('rotation', {
+          x: currentRot.x,
+          y: lerp(currentRot.y, targetRot.y, 0.1),
+          z: currentRot.z
+        });
 
-  status.innerText =
-    `Trigger: ${rotate ? 'Yes' : 'No'} | dx: ${dx.toFixed(2)} | dz: ${dz.toFixed(2)} | RotateYaw: ${dyaw.toFixed(2)}`;
-}
-
+        status.innerText = `L Gamepad: ${leftGamepad ? 'Yes' : 'No'} | R Gamepad: ${rightGamepad ? 'Yes' : 'No'} | dx: ${dx.toFixed(2)} | dz: ${dz.toFixed(2)} | Rotating: ${rotate}`;
+      }
 
       setInterval(pollControllers, 100);
     </script>
